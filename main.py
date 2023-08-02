@@ -14,13 +14,15 @@ dt = 0
 boole = True
 board = Board()
 board.defaultBoardLayout()
-selectedChecker = board.defaultBoardLayout()
-selectedChecker.selected = True
+selectedChecker = None
+currentTurn = "red"
 mouseBox = Rect(0,0,1,1)
 
 
 while running:
-    selectedChecker.moveHighlight()
+    if selectedChecker is not None:
+        selectedChecker.calculateMoves()
+        selectedChecker.moveHighlight()
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
     for event in pygame.event.get():
@@ -32,26 +34,38 @@ while running:
                     if mouseBox.colliderect(cell.hitbox):
                         print("Cell Color:",cell.color)
                         print("Cell Location:",y,x)
-                        print("Selected Checker Location:", selectedChecker.pos)
-                        print("Selected Checker Possible Kills:", selectedChecker.possibleKills.__len__())
-                        selectedChecker.move(x, y)
-                        if board.checkerLocations[y][x] is not None and board.checkerLocations[y][x].color == selectedChecker.color:
-                            print("New Checker Selected")
-                            selectedChecker.selected = False
-                            selectedChecker.moveHighlight(True)
-                            selectedChecker = board.checkerLocations[y][x]
-                            selectedChecker.selected = True
+                        print("Selected Checker Location:", selectedChecker.pos if selectedChecker is not None else "No Checker Selected")
+                        print("Selected Checker Possible Kills:", selectedChecker.possibleKills.__len__() if selectedChecker is not None else "No Checker Selected")
+                        if board.checkerLocations[y][x] is not None:
+                            if selectedChecker is not None and board.checkerLocations[y][x].color == selectedChecker.color:
+                                print("New Checker Selected")
+                                selectedChecker.selected = False
+                                selectedChecker.moveHighlight(True)
+                                selectedChecker = board.checkerLocations[y][x]
+                                selectedChecker.selected = True
+                            elif selectedChecker is None and board.checkerLocations[y][x].color == currentTurn:
+                                selectedChecker = board.checkerLocations[y][x]
+                                selectedChecker.selected = True
+                        elif selectedChecker is not None:
+                            if selectedChecker.move(x, y):
+                                match currentTurn:
+                                    case "red":
+                                        currentTurn = "white"
+                                    case "white":
+                                        currentTurn = "red"
+                                selectedChecker.selected = False
+                                selectedChecker = None
 
 
 
     # fill the screen with a color to wipe away anything from last frame
-    screen.fill("white")
+    screen.fill("white") if currentTurn == "white" else screen.fill("red")
 
     mouseBox.center = pygame.mouse.get_pos()
 
     board.drawBoard(boardSurface)
 
-    selectedChecker.calculateMoves()
+
 
     screen.blit(boardSurface,(0,0))
     pygame.draw.rect(screen, Color(255,255,255,0), mouseBox)

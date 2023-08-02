@@ -173,3 +173,4 @@ class Checker:
             for i in self.possibleKills:
                 if i.pos == (self.pos + self.lastPos):
                     self.board.checkerLocations[i.pos.first][i.pos.second] = None
+            return True
