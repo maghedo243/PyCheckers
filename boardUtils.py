@@ -5,9 +5,7 @@ from enum import IntEnum
 import pygame
 from pygame import Rect, Surface
 
-from util import Pair
-
-
+from util import Pair, inGameState
 
 
 class Board:
@@ -28,6 +26,8 @@ class Board:
                                 [None,None,None,None,None,None,None,None],
                                 [None,None,None,None,None,None,None,None],
                                 [None,None,None,None,None,None,None,None]]
+        self.oneColor = None
+        self.twoColor = None
 
     def drawBoard(self,screen : Surface):
         if screen.get_height() != screen.get_width():
@@ -46,15 +46,29 @@ class Board:
                     if self.checkerLocations[y][x].selected:
                         pygame.draw.circle(screen, "lightblue",(x * metric + metric / 2, y * metric + metric / 2), metric2 / 4)
 
-    def defaultBoardLayout(self):
+    def playerSearch(self,player:int):
+        for x in self.checkerLocations:
+            for y in x:
+                if y is not None:
+                    match player:
+                        case 1:
+                            if y.color == self.oneColor:
+                                return True
+                        case 2:
+                            if y.color == self.twoColor:
+                                return True
+        return False
+
+    def defaultBoardLayout(self,oneColor,twoColor):
+        self.oneColor = oneColor
+        self.twoColor = twoColor
         for x in range(8):
             for y in range(8):
                 if (x%2 == 0 and y%2 == 1 and x < 3) or (x%2 == 1 and y%2 == 0 and x < 3):
-                    Checker("white", self, CheckerDirection.DOWN, Pair(x, y))
+                    Checker(twoColor, self, CheckerDirection.DOWN, Pair(x, y), inGameState.PLAYERTWO)
                 elif (x%2 == 0 and y%2 == 1 and x > 4) or (x%2 == 1 and y%2 == 0 and x > 4):
-                    Checker("red", self, CheckerDirection.UP, Pair(x, y))
+                    Checker(oneColor, self, CheckerDirection.UP, Pair(x, y), inGameState.PLAYERONE)
 
-        startingChecker = None
         while True:
             startingChecker = self.checkerLocations[random.randint(2,5)][random.randint(2,5)]
             if startingChecker is not None:
@@ -74,8 +88,9 @@ class CheckerDirection(IntEnum):
     DOWN = 2
 
 class Checker:
-    def __init__(self, color: str, board: Board, direction: CheckerDirection, position: Pair):
+    def __init__(self, color: str, board: Board, direction: CheckerDirection, position: Pair, playerID: inGameState):
         self.color = color
+        self.playerID = playerID
         self.possibleMoves = list()
         self.possibleKills = list()
         self.board = board

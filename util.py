@@ -1,3 +1,6 @@
+from enum import Enum, IntEnum
+
+
 class Pair:
     def __init__(self,first,second):
         self.first = first
@@ -17,4 +20,9 @@ class Pair:
             if other.first == self.first and other.second == self.second:
                 return True
         return False
+
+class inGameState(IntEnum):
+    PLAYERONE = 1
+    PLAYERTWO = 2
+
 
