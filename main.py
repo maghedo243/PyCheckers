@@ -1,22 +1,23 @@
 import pygame
 from pygame import Rect, Color
 
-from boardUtils import Board, Checker, CheckerDirection
-from util import Pair, inGameState
+from boardUtils import Board
+from util import inGameState
 
 # pygame setup
 pygame.init()
 screen = pygame.display.set_mode((400, 500))
+pygame.display.set_caption("PyCheckers")
 boardSurface = pygame.Surface((400,400))
 clock = pygame.time.Clock()
 running = True
 dt = 0
-boole = True
 board = Board()
 board.defaultBoardLayout("red","white")
 selectedChecker = None
 currentTurn = inGameState.PLAYERONE
 mouseBox = Rect(0,0,1,1)
+
 
 
 while running:
