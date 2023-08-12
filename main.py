@@ -2,6 +2,8 @@ import pygame
 from pygame import Rect, Color
 from pygame_menu import themes
 
+from boardUtils import Board
+from util import inGameState
 import util
 from boardUtils import Board, Checker, CheckerDirection
 from util import Pair, inGameState, GameState
@@ -11,6 +13,7 @@ import pygame_menu
 #initial game setup
 pygame.init()
 screen = pygame.display.set_mode((400, 500))
+pygame.display.set_caption("PyCheckers")
 boardSurface = pygame.Surface((400,400))
 winSurface = pygame.Surface((350,350))
 winSurface.fill("blue")
@@ -115,5 +118,4 @@ while running:
     # independent physics.
     dt = clock.tick(60) / 1000
 
-
-
+pygame.quit()
