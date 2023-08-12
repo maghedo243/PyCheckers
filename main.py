@@ -1,13 +1,21 @@
 import pygame
 from pygame import Rect, Color
+from pygame_menu import themes
 
+import util
 from boardUtils import Board, Checker, CheckerDirection
-from util import Pair, inGameState
+from util import Pair, inGameState, GameState
 
-# pygame setup
+import pygame_menu
+
+#initial game setup
 pygame.init()
 screen = pygame.display.set_mode((400, 500))
 boardSurface = pygame.Surface((400,400))
+winSurface = pygame.Surface((350,350))
+winSurface.fill("blue")
+winSurface.set_alpha(0)
+util.surfaceBorder(winSurface,10,"black")
 clock = pygame.time.Clock()
 running = True
 dt = 0
@@ -16,8 +24,13 @@ board = Board()
 board.defaultBoardLayout("red","white")
 selectedChecker = None
 currentTurn = inGameState.PLAYERONE
+gameState = GameState.MENU
 mouseBox = Rect(0,0,1,1)
 
+mainmenu = pygame_menu.Menu('Welcome', 400, 500,
+                                 theme=themes.THEME_SOLARIZED)
+mainmenu.add.button('Play', mainmenu.disable)
+mainmenu.add.button('Quit', pygame_menu.events.EXIT)
 
 while running:
     if selectedChecker is not None:
@@ -26,57 +39,65 @@ while running:
 
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
-    for event in pygame.event.get():
+    events = pygame.event.get()
+    for event in events:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            for y,rows in enumerate(board.boardState):
-                for x,cell in enumerate(rows):
-                    if mouseBox.colliderect(cell.hitbox):
-                        print("White exists?",board.playerSearch(2))
-                        print("Cell Color:",cell.color)
-                        print("Cell Location:",y,x)
-                        print("Selected Checker Location:", selectedChecker.pos if selectedChecker is not None else "No Checker Selected")
-                        print("Selected Checker Possible Kills:", selectedChecker.possibleKills.__len__() if selectedChecker is not None else "No Checker Selected")
-                        if board.checkerLocations[y][x] is not None:
-                            if selectedChecker is not None and board.checkerLocations[y][x].playerID == selectedChecker.playerID:
-                                print("New Checker Selected")
-                                selectedChecker.selected = False
-                                selectedChecker.moveHighlight(True)
-                                selectedChecker = board.checkerLocations[y][x]
-                                selectedChecker.selected = True
-                            elif selectedChecker is None and board.checkerLocations[y][x].playerID == currentTurn:
-                                selectedChecker = board.checkerLocations[y][x]
-                                selectedChecker.selected = True
-                        elif selectedChecker is not None:
-                            if selectedChecker.move(x, y):
-                                match currentTurn:
-                                    case inGameState.PLAYERONE:
-                                        currentTurn = inGameState.PLAYERTWO
-                                    case inGameState.PLAYERTWO:
-                                        currentTurn = inGameState.PLAYERONE
-                                selectedChecker.selected = False
-                                selectedChecker = None
+            if not mainmenu.is_enabled(): #Board Click Check
+                for y,rows in enumerate(board.boardState):
+                    for x,cell in enumerate(rows):
+                        if mouseBox.colliderect(cell.hitbox):
+                            print("White exists?",board.playerSearch(2))
+                            print("Cell Color:",cell.color)
+                            print("Cell Location:",y,x)
+                            print("Selected Checker Location:", selectedChecker.pos if selectedChecker is not None else "No Checker Selected")
+                            print("Selected Checker Possible Kills:", selectedChecker.possibleKills.__len__() if selectedChecker is not None else "No Checker Selected")
+                            if board.checkerLocations[y][x] is not None:
+                                if selectedChecker is not None and board.checkerLocations[y][x].playerID == selectedChecker.playerID:
+                                    print("New Checker Selected")
+                                    selectedChecker.selected = False
+                                    selectedChecker.moveHighlight(True)
+                                    selectedChecker = board.checkerLocations[y][x]
+                                    selectedChecker.selected = True
+                                elif selectedChecker is None and board.checkerLocations[y][x].playerID == currentTurn:
+                                    selectedChecker = board.checkerLocations[y][x]
+                                    selectedChecker.selected = True
+                            elif selectedChecker is not None:
+                                if selectedChecker.move(x, y):
+                                    match currentTurn:
+                                        case inGameState.PLAYERONE:
+                                            currentTurn = inGameState.PLAYERTWO
+                                        case inGameState.PLAYERTWO:
+                                            currentTurn = inGameState.PLAYERONE
+                                    selectedChecker.selected = False
+                                    selectedChecker = None
 
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("darkgray")
 
-    mouseBox.center = pygame.mouse.get_pos()
-    textFont = pygame.font.SysFont("monospace", 15)
-    turnText = textFont.render("Turn:",1,(255,255,255,0))
-    turnSquare = Rect(204,429,30,30)
-    turnSquareBorder = Rect(200,425,38,38)
+    #game ui and game creation
+    if not mainmenu.is_enabled():
+        mouseBox.center = pygame.mouse.get_pos()
+        textFont = pygame.font.SysFont("monospace", 15)
+        turnText = textFont.render("Turn:",1,(255,255,255,0))
+        turnSquare = Rect(204,429,30,30)
+        turnSquareBorder = Rect(200,425,38,38)
 
-    board.drawBoard(boardSurface)
+        board.drawBoard(boardSurface)
 
-    screen.blit(boardSurface,(0,0))
-    screen.blit(turnText,(150,430))
-    pygame.draw.rect(screen, Color(255,255,255,0), mouseBox)
-    pygame.draw.rect(screen,"lightgray", turnSquareBorder,border_radius=6)
-    pygame.draw.rect(screen,"white" if currentTurn == inGameState.PLAYERTWO else "red",turnSquare)
-    # flip() the display to put your work on screen
-    pygame.display.flip()
+        screen.blits(((boardSurface,(0,0)),(turnText,(150,430)),(winSurface,(25,75))))
+        pygame.draw.rect(screen, Color(255,255,255,0), mouseBox)
+        pygame.draw.rect(screen,"lightgray", turnSquareBorder,border_radius=6)
+        pygame.draw.rect(screen,"white" if currentTurn == inGameState.PLAYERTWO else "red",turnSquare)
 
+    #menu draw
+    if mainmenu.is_enabled():
+        mainmenu.update(events)
+        if mainmenu.is_enabled():
+            mainmenu.draw(screen)
+
+    # win check
     if not board.playerSearch(1):
         print(board.twoColor.capitalize(),"Wins")
         running = False
@@ -84,9 +105,15 @@ while running:
         print(board.oneColor.capitalize(),"Wins")
         running = False
 
+    # flip() the display to put your work on screen
+    pygame.display.flip()
+
+
+
     # limits FPS to 60
     # dt is delta time in seconds since last frame, used for framerate-
     # independent physics.
     dt = clock.tick(60) / 1000
 
-pygame.quit()
+
+

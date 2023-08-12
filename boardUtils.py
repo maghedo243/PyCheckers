@@ -59,6 +59,14 @@ class Board:
                                 return True
         return False
 
+    def winCheck(self):
+        if not self.playerSearch(2): #player one wins
+            return 1
+        elif not self.playerSearch(1): #player two wins
+            return 2
+        else:
+            return False
+
     def defaultBoardLayout(self,oneColor,twoColor):
         self.oneColor = oneColor
         self.twoColor = twoColor
