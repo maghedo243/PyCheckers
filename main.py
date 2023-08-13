@@ -27,7 +27,7 @@ board = Board()
 board.defaultBoardLayout("red","white")
 selectedChecker = None
 currentTurn = inGameState.PLAYERONE
-gameState = GameState.MENU
+gameState = GameState.INGAME
 mouseBox = Rect(0,0,1,1)
 
 mainmenu = pygame_menu.Menu('Welcome', 400, 500,
@@ -47,7 +47,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            if not mainmenu.is_enabled(): #Board Click Check
+            if gameState == GameState.INGAME: #Board Click Check
                 for y,rows in enumerate(board.boardState):
                     for x,cell in enumerate(rows):
                         if mouseBox.colliderect(cell.hitbox):

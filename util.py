@@ -31,6 +31,7 @@ class inGameState(IntEnum):
 class GameState(IntEnum):
     MENU = 1
     INGAME = 2
+    GAMEOVER = 3
 
 def surfaceBorder(surface: Surface,thickness: int,color):
     widthIndex = (thickness/(thickness-2)) if (thickness-2 > 0) else 0
