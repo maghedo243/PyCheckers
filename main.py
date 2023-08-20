@@ -3,7 +3,7 @@ from pygame import Rect
 
 import util
 from boardUtils import Board
-from util import inGameState, GameState
+from util import inGameState, GameState, get_path
 
 import pygame_gui
 
@@ -19,11 +19,11 @@ util.surfaceBorder(winSurface,10,"black")
 clock = pygame.time.Clock()
 
 gameState = GameState.MENU
-oneImage = pygame.image.load("playerone.png")
+oneImage = pygame.image.load(get_path("resources/images/playerone.png"))
 oneImage = pygame.transform.smoothscale(oneImage,(300,49))
-twoImage = pygame.image.load("playertwo.png")
+twoImage = pygame.image.load(get_path("resources/images/playertwo.png"))
 twoImage = pygame.transform.smoothscale(twoImage,(300,49))
-winImage = pygame.image.load("wins.png")
+winImage = pygame.image.load(get_path("resources/images/wins.png"))
 winImage = pygame.transform.smoothscale(winImage,(145,49))
 
 textFont = pygame.font.SysFont("monospace", 15)

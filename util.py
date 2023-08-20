@@ -1,3 +1,5 @@
+import os
+import sys
 from enum import Enum, IntEnum
 
 import pygame
@@ -39,3 +41,11 @@ def surfaceBorder(surface: Surface,thickness: int,color):
     yLimit = surface.get_height()-widthIndex
     pygame.draw.lines(surface, color, True, [(widthIndex,widthIndex),(widthIndex,yLimit),(xLimit,yLimit),(xLimit,widthIndex)],thickness)
 
+
+def get_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.abspath(".")
+
+    return os.path.normpath(os.path.join(base_path, relative_path))
