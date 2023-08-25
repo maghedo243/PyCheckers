@@ -14,7 +14,14 @@ class Pair:
     def __str__(self):
         return "(" + str(self.first) + "," + str(self.second) + ")"
 
-    def __add__(self, other):
+    def __add__(self,other):
+        if isinstance(other, Pair):
+            return Pair(self.first+other.first,self.second+other.second)
+        elif isinstance(other,tuple):
+            return Pair(self.first+other[0],self.second+other[1])
+        return False
+
+    def __mul__(self, other):
         if isinstance(other,Pair):
             newFirst = int((self.first + other.first) / 2)
             newSecond = int((self.second + other.second) / 2)
@@ -24,7 +31,17 @@ class Pair:
         if isinstance(other, Pair):
             if other.first == self.first and other.second == self.second:
                 return True
+        elif isinstance(other,tuple):
+            if other.__len__() == 2:
+                if other[0] == self.first and other[1] == self.second:
+                    return True
         return False
+
+class CheckerMove:
+    def __init__(self,square,direction):
+        self.moveSquare = square
+        self.moveDirection = direction
+
 
 class inGameState(IntEnum):
     PLAYERONE = 1

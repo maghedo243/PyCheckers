@@ -30,7 +30,10 @@ textFont = pygame.font.SysFont("monospace", 15)
 winFont = pygame.font.SysFont("monospace", 30)
 
 def gameInit(newboard: Board,oneColor,twoColor):
+    newboard.clear()
     newboard.defaultBoardLayout(oneColor,twoColor)
+    oneImage.fill(newboard.oneColor, special_flags=pygame.BLEND_MAX)
+    twoImage.fill(newboard.twoColor, special_flags=pygame.BLEND_MAX)
     return [None,inGameState.PLAYERONE]
 
 running = True
@@ -89,19 +92,23 @@ while running:
 
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == startButton:
+                selectedChecker, currentTurn = gameInit(board, board.oneColor, board.twoColor)
                 gameState = GameState.INGAME
                 mainMenu.disable()
             elif event.ui_element == quitButton:
                 pygame.event.post(pygame.event.Event(pygame.QUIT))
             elif event.ui_element == replayButton:
-                print("Restart")
                 selectedChecker, currentTurn = gameInit(board, board.oneColor, board.twoColor)
                 winMenu.disable()
+                winSurface.fill("blue")
                 winSurface.set_alpha(0)
+                util.surfaceBorder(winSurface, 10, "black")
                 gameState = GameState.INGAME
             elif event.ui_element == menuButton:
                 winMenu.disable()
+                winSurface.fill("blue")
                 winSurface.set_alpha(0)
+                util.surfaceBorder(winSurface, 10, "black")
                 mainMenu.enable()
                 gameState = GameState.MENU
         if event.type == pygame.QUIT:
@@ -162,11 +169,11 @@ while running:
                 winMenuManager.draw_ui(screen)
                 match wincheck:
                     case 1:
-                        oneImage.fill(board.oneColor, special_flags=pygame.BLEND_ADD)
+                        winImage.fill(board.twoColor, special_flags=pygame.BLEND_SUB)
                         winImage.fill(board.oneColor, special_flags=pygame.BLEND_ADD)
                         winSurface.blits(((oneImage, (25, 50)),(winImage,(102.5,110))))
                     case 2:
-                        twoImage.fill(board.twoColor, special_flags=pygame.BLEND_ADD)
+                        winImage.fill(board.oneColor, special_flags=pygame.BLEND_SUB)
                         winImage.fill(board.twoColor, special_flags=pygame.BLEND_ADD)
                         winSurface.blits(((twoImage, (25, 50)),(winImage,(102.5,110))))
                     case _:
