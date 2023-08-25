@@ -34,6 +34,13 @@ class Board:
         self.twoColor = None
 
     def drawBoard(self,screen : Surface):
+        """
+        Draws the board squares and checkers on the given screen
+
+        :param screen: the Surface that the board is drawn on.
+        :type screen: Surface
+        :return: True if the board draw is complete
+        """
         if screen.get_height() != screen.get_width():
             return False
 
@@ -54,6 +61,13 @@ class Board:
                         pygame.draw.circle(screen, "lightblue",(x * metric + metric / 2, y * metric + metric / 2), metric2 / 4)
 
     def playerSearch(self,player:int):
+        """
+        Searches to see if a playerID exists on the board. (1 or 2)
+
+        :param player: The playerID that is given. (1 or 2)
+        :type player: int
+        :return: True if the player is found
+        """
         for x in self.checkerLocations:
             for y in x:
                 if y is not None:
@@ -85,6 +99,13 @@ class Board:
                                  [None, None, None, None, None, None, None, None]]
 
     def defaultBoardLayout(self,oneColor,twoColor):
+        """
+        Makes the board match the standard Checkers layout.
+
+        :param oneColor: Player One color
+        :param twoColor: Player Two color
+        :return: The starting checker
+        """
         self.oneColor = oneColor
         self.twoColor = twoColor
         for x in range(8):
@@ -115,16 +136,20 @@ class Board:
 
 
 class BoardSquare:
+    """A square on a board. It stores the hitbox and color."""
+
     def __init__(self,color):
         self.color = color
         self.hitbox = Rect(0,0,0,0)
 
 class CheckerDirection(IntEnum):
+    """The direction state a checker can move. Options are \"KING\", \"UP\", or \"DOWN\" """
     KING = 0
     UP = 1
     DOWN = 2
 
 class MoveDirection(Enum):
+    """The directions that a checker can move. \"UPLEFT\", \"UPRIGHT\", \"DOWNLEFT\", \"DOWNRIGHT\" """
     UPLEFT = (-1,-1)
     UPRIGHT = (-1,1)
     DOWNLEFT = (1,-1)
@@ -134,6 +159,19 @@ class MoveDirection(Enum):
         return -self.value[0],-self.value[1]
 
 class Checker:
+    """A checker. This stores its:
+
+    - color
+    - playerID
+    - possible moves
+    - possible kills
+    - the board it is assigned to
+    - its direction state
+    - its position and last position
+    - its most recent move
+    - if it's selected or not.
+
+    """
     def __init__(self, color: str, board: Board, direction: CheckerDirection, position: Pair, playerID: inGameState):
         self.color = color
         self.playerID = playerID
@@ -149,6 +187,7 @@ class Checker:
 
     
     def calculateMoves(self):
+        """Calculates the move possibilities based on the Checker's direction state."""
         self.possibleMoves.clear()
         self.calculateKills()
         match self.direction:
@@ -165,7 +204,13 @@ class Checker:
                 self.moveCast(MoveDirection.DOWNRIGHT, "king")
 
 
-    def moveCast(self,direction:MoveDirection,moveClass:str): #Calculates moves based on direction
+    def moveCast(self,direction:MoveDirection,moveClass:str):
+        """
+        Auxilary method used by :py:meth:`calculateMoves()` to determine where each move location is.
+
+        :param direction: Ordinal direction in which the moveCast is happening.
+        :param moveClass: Type of Checker ("standard" or "king")
+        """
         match direction:
             case MoveDirection.UPLEFT:
                 first = MoveDirection.UPLEFT.value[0]
@@ -221,6 +266,7 @@ class Checker:
 
 
     def calculateKills(self):
+        """Calculates which enemy checkers are available to kill."""
         self.possibleKills.clear()
         match self.direction:
             case CheckerDirection.UP:
@@ -236,6 +282,7 @@ class Checker:
                 self.killCast(MoveDirection.DOWNRIGHT, "king")
 
     def killCast(self, direction:MoveDirection,killClass:str):
+        """Auxilary method used by :py:meth:`calculateKills()` to determine where each kill location is."""
         match direction:
             case MoveDirection.UPLEFT:
                 first = -1
@@ -272,6 +319,11 @@ class Checker:
 
 
     def moveHighlight(self, reset=False):
+        """
+        Highlights the squares that represent the moves you can do.
+
+        :param reset: if True, the squares return to their default color.
+        """
         if len(self.possibleMoves) == 0:
             return
         if reset:
@@ -282,6 +334,12 @@ class Checker:
                 x.moveSquare.color = "lightblue"
 
     def move(self, x: int, y: int):
+        """
+        Moves checker to location if it's included in the possible moves.
+
+        :param x: attempted X location
+        :param y: attempted Y location
+        """
         moveSquares = list(map(lambda move: move.moveSquare,self.possibleMoves))
         if self.board.checkerLocations[y][x] is None and self.board.boardState[y][x] in [move.moveSquare for move in self.possibleMoves]:
             moveIndex = moveSquares.index(self.board.boardState[y][x])

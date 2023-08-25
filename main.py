@@ -18,13 +18,11 @@ winSurface.set_alpha(0)
 util.surfaceBorder(winSurface,10,"black")
 clock = pygame.time.Clock()
 
+
 gameState = GameState.MENU
-oneImage = pygame.image.load(get_path("resources/images/playerone.png"))
-oneImage = pygame.transform.smoothscale(oneImage,(300,49))
-twoImage = pygame.image.load(get_path("resources/images/playertwo.png"))
-twoImage = pygame.transform.smoothscale(twoImage,(300,49))
-winImage = pygame.image.load(get_path("resources/images/wins.png"))
-winImage = pygame.transform.smoothscale(winImage,(145,49))
+oneImage = util.getImage("resources/images/playerone.png",(300,49))
+twoImage = util.getImage("resources/images/playertwo.png",(300,49))
+winImage = util.getImage("resources/images/wins.png",(145,49))
 
 textFont = pygame.font.SysFont("monospace", 15)
 winFont = pygame.font.SysFont("monospace", 30)

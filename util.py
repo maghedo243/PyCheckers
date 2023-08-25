@@ -60,9 +60,28 @@ def surfaceBorder(surface: Surface,thickness: int,color):
 
 
 def get_path(relative_path):
+    """
+    Finds path to file relative to the runtime.
+
+    :param relative_path: pathstring
+    :return: runtime filepath
+    """
     try:
         base_path = sys._MEIPASS
     except AttributeError:
         base_path = os.path.abspath(".")
 
     return os.path.normpath(os.path.join(base_path, relative_path))
+
+def getImage(path:str, newScale:tuple=None):
+    """
+    Gets image from path and resizes it if necessary
+
+    :param path: path to image file
+    :param newScale: scale to set on image (default: None)
+    :return: image Surface
+    """
+    image = pygame.image.load(get_path(path))
+    if newScale != None:
+        image = pygame.transform.smoothscale(image,newScale)
+    return image
