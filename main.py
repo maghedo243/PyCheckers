@@ -3,7 +3,7 @@ from pygame import Rect
 
 import util
 from boardUtils import Board
-from util import inGameState, GameState, get_path
+from util import inGameState, GameState
 
 import pygame_gui
 

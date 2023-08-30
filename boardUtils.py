@@ -1,8 +1,7 @@
 import copy
 import random
-import time
-from enum import IntEnum, Enum
-from queue import Queue, SimpleQueue
+from enum import IntEnum
+from queue import SimpleQueue
 
 import pygame
 from pygame import Rect, Surface
@@ -283,7 +282,14 @@ class Checker:
 
 
     def killCast(self, move:CheckerMove):
+        """
+        Auxilary method used by :py:meth:`calculateMoves()` to calculate which checkers are in the kill scope
+
+        :param move: CheckerMove to cast from
+        :return: Kill Location
+        """
         antidir = -move.moveDirection
+        #checking checker opposite of move location
         if self.board.checkerLocations[move.coords.first + antidir[0]][move.coords.second + antidir[1]].color != self.color:
             return self.board.checkerLocations[move.coords.first + antidir[0]][move.coords.second + antidir[1]]
 
