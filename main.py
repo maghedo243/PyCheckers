@@ -28,7 +28,7 @@ winFont = pygame.font.SysFont("monospace", 30)
 
 def gameInit(newboard: Board,oneColor,twoColor):
     newboard.clear()
-    newboard.testBoardLayout(oneColor,twoColor)
+    newboard.defaultBoardLayout(oneColor,twoColor)
     oneImage.fill(newboard.oneColor, special_flags=pygame.BLEND_MAX)
     twoImage.fill(newboard.twoColor, special_flags=pygame.BLEND_MAX)
     return [None,inGameState.PLAYERONE]
