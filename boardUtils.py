@@ -2,11 +2,12 @@ import copy
 import random
 import time
 from enum import IntEnum, Enum
+from queue import Queue, SimpleQueue
 
 import pygame
 from pygame import Rect, Surface
 
-from util import Pair, inGameState, CheckerMove, get_path
+from util import Pair, inGameState, CheckerMove, get_path, MoveDirection
 
 crownImage = pygame.image.load(get_path("resources/images/crown.png"))
 crownImage = pygame.transform.smoothscale(crownImage,(30,30))
@@ -125,6 +126,9 @@ class Board:
         self.oneColor = oneColor
         self.twoColor = twoColor
         Checker(twoColor, self, CheckerDirection.DOWN, Pair(2, 5), inGameState.PLAYERTWO)
+        Checker(twoColor, self, CheckerDirection.DOWN, Pair(5, 2), inGameState.PLAYERTWO)
+        Checker(twoColor, self, CheckerDirection.DOWN, Pair(3, 2), inGameState.PLAYERTWO)
+        Checker(twoColor, self, CheckerDirection.DOWN, Pair(1, 2), inGameState.PLAYERTWO)
         Checker(oneColor, self, CheckerDirection.UP, Pair(6, 1), inGameState.PLAYERONE)
         while True:
             startingChecker = self.checkerLocations[random.randint(2,5)][random.randint(2,5)]
@@ -142,21 +146,16 @@ class BoardSquare:
         self.color = color
         self.hitbox = Rect(0,0,0,0)
 
+    def __str__(self):
+        return "X: " + str(self.hitbox.x) + ", Y: " + str(self.hitbox.y)
+
 class CheckerDirection(IntEnum):
     """The direction state a checker can move. Options are \"KING\", \"UP\", or \"DOWN\" """
     KING = 0
     UP = 1
     DOWN = 2
 
-class MoveDirection(Enum):
-    """The directions that a checker can move. \"UPLEFT\", \"UPRIGHT\", \"DOWNLEFT\", \"DOWNRIGHT\" """
-    UPLEFT = (-1,-1)
-    UPRIGHT = (-1,1)
-    DOWNLEFT = (1,-1)
-    DOWNRIGHT = (1,1)
 
-    def __neg__(self):
-        return -self.value[0],-self.value[1]
 
 class Checker:
     """A checker. This stores its:
@@ -185,32 +184,56 @@ class Checker:
         self.board.checkerLocations[self.pos.first][self.pos.second] = self
         self.selected = False
 
-    
+
     def calculateMoves(self):
         """Calculates the move possibilities based on the Checker's direction state."""
+        localMoves = list()
+        toBeVisited = SimpleQueue()
+        visited = set()
+        current = CheckerMove(None,self.pos,None,"noncapture")
         self.possibleMoves.clear()
-        self.calculateKills()
-        match self.direction:
-            case CheckerDirection.UP:
-                self.moveCast(MoveDirection.UPLEFT,"standard")
-                self.moveCast(MoveDirection.UPRIGHT, "standard")
-            case CheckerDirection.DOWN:
-                self.moveCast(MoveDirection.DOWNRIGHT, "standard")
-                self.moveCast(MoveDirection.DOWNLEFT, "standard")
-            case CheckerDirection.KING:
-                self.moveCast(MoveDirection.UPLEFT, "king")
-                self.moveCast(MoveDirection.UPRIGHT, "king")
-                self.moveCast(MoveDirection.DOWNLEFT, "king")
-                self.moveCast(MoveDirection.DOWNRIGHT, "king")
+        while True:
+            localMoves.clear()
+            if isinstance(current, CheckerMove): visited.add(current)
+            match self.direction:
+                case CheckerDirection.UP:
+                    localMoves.append(self.moveCast(MoveDirection.UPLEFT, "standard",current))
+                    localMoves.append(self.moveCast(MoveDirection.UPRIGHT, "standard",current))
+                case CheckerDirection.DOWN:
+                    localMoves.append(self.moveCast(MoveDirection.DOWNLEFT, "standard", current))
+                    localMoves.append(self.moveCast(MoveDirection.DOWNRIGHT, "standard", current))
+                case CheckerDirection.KING:
+                    localMoves.extend(self.moveCast(MoveDirection.UPLEFT, "king", current))
+                    localMoves.extend(self.moveCast(MoveDirection.UPRIGHT, "king", current))
+                    localMoves.extend(self.moveCast(MoveDirection.DOWNLEFT, "king", current))
+                    localMoves.extend(self.moveCast(MoveDirection.DOWNRIGHT, "king", current))
 
 
-    def moveCast(self,direction:MoveDirection,moveClass:str):
+            for move in localMoves:
+                if move:
+                    self.possibleMoves.append(move)
+                    if move.moveType == "capture" and move not in visited and move.coords not in [visitedMove.coords for visitedMove in visited]:
+                        toBeVisited.put_nowait(move)
+                        kill = self.killCast(move)
+                        self.possibleKills.append(kill)
+                        move.kill = kill
+
+            if toBeVisited.empty(): break
+            else:
+                current = toBeVisited.get_nowait()
+
+
+
+    def moveCast(self,direction:MoveDirection,moveClass:str,origin:CheckerMove) -> CheckerMove | list:
         """
         Auxilary method used by :py:meth:`calculateMoves()` to determine where each move location is.
 
         :param direction: Ordinal direction in which the moveCast is happening.
         :param moveClass: Type of Checker ("standard" or "king")
+        :param origin: Original move to cast move from
         """
+        pos = origin.coords
+        first, second, xfirst, xsecond = 8,8,8,8
         match direction:
             case MoveDirection.UPLEFT:
                 first = MoveDirection.UPLEFT.value[0]
@@ -234,20 +257,16 @@ class Checker:
                 xsecond = MoveDirection.DOWNRIGHT.value[1] + 1
         match moveClass:
             case "standard":
-                if 7 >= self.pos.first + first >= 0 and 7 >= self.pos.second + second >= 0 and \
-                        self.board.checkerLocations[self.pos.first + first][self.pos.second + second] is None:
-                    self.possibleMoves.append(CheckerMove(self.board.boardState[self.pos.first + first][self.pos.second + second],direction))
-                elif 7 >= self.pos.first + first >= 0 and 7 >= self.pos.second + second >= 0 and \
-                        self.board.checkerLocations[self.pos.first + first][
-                            self.pos.second + second].color != self.color and 7 >= self.pos.first + xfirst >= 0 and 7 >= self.pos.second + xsecond >= 0 and \
-                        self.board.checkerLocations[self.pos.first + xfirst][self.pos.second + xsecond] is None:
-                    self.possibleMoves.append(CheckerMove(self.board.boardState[self.pos.first + xfirst][self.pos.second + xsecond],direction))
+                if origin.moveType == "noncapture" and 7 >= pos.first + first >= 0 and 7 >= pos.second + second >= 0 and self.board.checkerLocations[pos.first + first][pos.second + second] is None:
+                    return CheckerMove(self.board.boardState[pos.first + first][pos.second + second], Pair(pos.first + first,pos.second + second), direction, "noncapture")
+                elif 7 >= pos.first + first >= 0 and 7 >= pos.second + second >= 0 and 7 >= pos.first + xfirst >= 0 and 7 >= pos.second + xsecond >= 0:
+                    if self.board.checkerLocations[pos.first + first][pos.second + second] is not None and self.board.checkerLocations[pos.first + first][pos.second + second].color != self.color and self.board.checkerLocations[pos.first + xfirst][pos.second + xsecond] is None:
+                        return CheckerMove(self.board.boardState[pos.first + xfirst][pos.second + xsecond], Pair(pos.first + xfirst,pos.second + xsecond), direction,"capture",origin)
             case "king":
+                kingMoves = list()
                 while True:
-                    if 7 >= self.pos.first + first >= 0 and 7 >= self.pos.second + second >= 0 and \
-                            self.board.checkerLocations[self.pos.first + first][self.pos.second + second] is None:
-                        self.possibleMoves.append(CheckerMove(
-                            self.board.boardState[self.pos.first + first][self.pos.second + second],direction))
+                    if origin.moveType == "noncapture" and 7 >= pos.first + first >= 0 and 7 >= pos.second + second >= 0 and self.board.checkerLocations[pos.first + first][pos.second + second] is None:
+                        kingMoves.append(CheckerMove(self.board.boardState[pos.first + first][pos.second + second],Pair(pos.first + first,pos.second + second),direction,"noncapture"))
                     else:
                         break
 
@@ -257,66 +276,16 @@ class Checker:
                 xfirst = (first - 1) if first < 0 else first + 1
                 xsecond = (second - 1) if second < 0 else second + 1
 
-                if 7 >= self.pos.first + first >= 0 and 7 >= self.pos.second + second >= 0 and \
-                        self.board.checkerLocations[self.pos.first + first][
-                            self.pos.second + second].color != self.color and 7 >= self.pos.first + xfirst >= 0 and 7 >= self.pos.second + xsecond >= 0 and \
-                        self.board.checkerLocations[self.pos.first + xfirst][self.pos.second + xsecond] is None:
-                    self.possibleMoves.append(CheckerMove(self.board.boardState[self.pos.first + xfirst][self.pos.second + xsecond],direction))
+                if 7 >= pos.first + first >= 0 and 7 >= pos.second + second >= 0 and 7 >= pos.first + xfirst >= 0 and 7 >= pos.second + xsecond >= 0:
+                        if self.board.checkerLocations[pos.first + first][pos.second + second] is not None and self.board.checkerLocations[pos.first + first][pos.second + second].color != self.color and self.board.checkerLocations[pos.first + xfirst][pos.second + xsecond] is None:
+                            kingMoves.append(CheckerMove(self.board.boardState[pos.first + xfirst][pos.second + xsecond],Pair(pos.first + xfirst,pos.second + xsecond),direction,"capture",origin))
+                return kingMoves
 
 
-
-    def calculateKills(self):
-        """Calculates which enemy checkers are available to kill."""
-        self.possibleKills.clear()
-        match self.direction:
-            case CheckerDirection.UP:
-                self.killCast(MoveDirection.UPLEFT,"standard")
-                self.killCast(MoveDirection.UPRIGHT, "standard")
-            case CheckerDirection.DOWN:
-                self.killCast(MoveDirection.DOWNLEFT, "standard")
-                self.killCast(MoveDirection.DOWNRIGHT, "standard")
-            case CheckerDirection.KING:
-                self.killCast(MoveDirection.UPLEFT, "king")
-                self.killCast(MoveDirection.UPRIGHT, "king")
-                self.killCast(MoveDirection.DOWNLEFT, "king")
-                self.killCast(MoveDirection.DOWNRIGHT, "king")
-
-    def killCast(self, direction:MoveDirection,killClass:str):
-        """Auxilary method used by :py:meth:`calculateKills()` to determine where each kill location is."""
-        match direction:
-            case MoveDirection.UPLEFT:
-                first = -1
-                second = -1
-            case MoveDirection.UPRIGHT:
-                first = -1
-                second = 1
-            case MoveDirection.DOWNLEFT:
-                first = 1
-                second = -1
-            case MoveDirection.DOWNRIGHT:
-                first = 1
-                second = 1
-        match killClass:
-            case "standard":
-                if 7 >= self.pos.first + first >= 0 and 7 >= self.pos.second + second >= 0 and \
-                        self.board.checkerLocations[self.pos.first + first][self.pos.second + second] is not None and \
-                        self.board.checkerLocations[self.pos.first + first][self.pos.second + second].color != self.color:
-                    self.possibleKills.append(self.board.checkerLocations[self.pos.first + first][self.pos.second + second])
-            case "king":
-                while True:
-                    if 7 >= self.pos.first + first >= 0 and 7 >= self.pos.second + second >= 0 and \
-                            self.board.checkerLocations[self.pos.first + first][self.pos.second + second] is None:
-                        pass
-                    else:
-                        break
-
-                    first = (first - 1) if first < 0 else first + 1
-                    second = (second - 1) if second < 0 else second + 1
-
-                if 7 >= self.pos.first + first >= 0 and 7 >= self.pos.second + second >= 0:
-                    self.possibleKills.append(self.board.checkerLocations[self.pos.first + first][self.pos.second + second])
-
-
+    def killCast(self, move:CheckerMove):
+        antidir = -move.moveDirection
+        if self.board.checkerLocations[move.coords.first + antidir[0]][move.coords.second + antidir[1]].color != self.color:
+            return self.board.checkerLocations[move.coords.first + antidir[0]][move.coords.second + antidir[1]]
 
     def moveHighlight(self, reset=False):
         """
@@ -350,9 +319,17 @@ class Checker:
             self.pos.first = y
             self.pos.second = x
             self.moveHighlight(True)
+
+            print(self.possibleMoves[moveIndex])
+            print(self.possibleKills)
             for i in self.possibleKills:
                 if i.pos == self.pos + -self.lastMove.moveDirection:
-                    self.board.checkerLocations[i.pos.first][i.pos.second] = None
+                    curr = self.possibleMoves[moveIndex]
+                    while curr.kill is not None:
+                        self.board.checkerLocations[curr.kill.pos.first][curr.kill.pos.second] = None
+                        curr = curr.parentMove
+
+
 
             if (self.playerID == inGameState.PLAYERONE and self.pos.first == 0) or (self.playerID == inGameState.PLAYERTWO and self.pos.first == 7):
                 self.direction = CheckerDirection.KING

@@ -37,10 +37,30 @@ class Pair:
                     return True
         return False
 
+class MoveDirection(Enum):
+    """The directions that a checker can move. \"UPLEFT\", \"UPRIGHT\", \"DOWNLEFT\", \"DOWNRIGHT\" """
+    UPLEFT = (-1,-1)
+    UPRIGHT = (-1,1)
+    DOWNLEFT = (1,-1)
+    DOWNRIGHT = (1,1)
+
+    def __neg__(self):
+        return -self.value[0],-self.value[1]
+
 class CheckerMove:
-    def __init__(self,square,direction):
+    def __init__(self,square,coords:Pair,direction:MoveDirection,moveType:str,parentMove=None):
         self.moveSquare = square
         self.moveDirection = direction
+        self.moveType = moveType
+        self.coords = coords
+        self.kill = None
+        self.parentMove = parentMove
+
+    def __str__(self):
+        return "Move Square - " + str(self.moveSquare) + ", Move Direction: " + str(self.moveDirection) + ", Move Type: " + self.moveType + ", Kill Target: " + str(self.kill)
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class inGameState(IntEnum):

@@ -18,7 +18,6 @@ winSurface.set_alpha(0)
 util.surfaceBorder(winSurface,10,"black")
 clock = pygame.time.Clock()
 
-
 gameState = GameState.MENU
 oneImage = util.getImage("resources/images/playerone.png",(300,49))
 twoImage = util.getImage("resources/images/playertwo.png",(300,49))
@@ -29,7 +28,7 @@ winFont = pygame.font.SysFont("monospace", 30)
 
 def gameInit(newboard: Board,oneColor,twoColor):
     newboard.clear()
-    newboard.defaultBoardLayout(oneColor,twoColor)
+    newboard.testBoardLayout(oneColor,twoColor)
     oneImage.fill(newboard.oneColor, special_flags=pygame.BLEND_MAX)
     twoImage.fill(newboard.twoColor, special_flags=pygame.BLEND_MAX)
     return [None,inGameState.PLAYERONE]
