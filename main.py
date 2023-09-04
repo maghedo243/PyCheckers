@@ -1,13 +1,19 @@
+import os
+import time
+
+from tkinter.colorchooser import askcolor
 import pygame
+import pygame.gfxdraw
 from pygame import Rect
 
 import util
 from boardUtils import Board
-from util import inGameState, GameState
+from util import inGameState, GameState, Settings
 
 import pygame_gui
 
 #initial game setup
+Settings.loadSettings()
 pygame.init()
 screen = pygame.display.set_mode((400, 500))
 pygame.display.set_caption("PyCheckers")
@@ -18,10 +24,14 @@ winSurface.set_alpha(0)
 util.surfaceBorder(winSurface,10,"black")
 clock = pygame.time.Clock()
 
+
+
+
 gameState = GameState.MENU
 oneImage = util.getImage("resources/images/playerone.png",(300,49))
 twoImage = util.getImage("resources/images/playertwo.png",(300,49))
 winImage = util.getImage("resources/images/wins.png",(145,49))
+logo = util.getImage("resources/images/pycheckers.png",(370,69))
 
 textFont = pygame.font.SysFont("monospace", 15)
 winFont = pygame.font.SysFont("monospace", 30)
@@ -36,26 +46,38 @@ def gameInit(newboard: Board,oneColor,twoColor):
 running = True
 dt = 0
 board = Board()
-selectedChecker, currentTurn = gameInit(board,"red","white")
+selectedChecker, currentTurn = gameInit(board, Settings.checkerColorOne, Settings.checkerColorTwo)
 background = pygame.Surface((400,500))
-background.fill("lightgray")
+background.fill("darkolivegreen4")
 
 #mainmenu setup
 mainMenuManager = pygame_gui.UIManager((400,500))
 mainMenu = pygame_gui.core.UIContainer(relative_rect=screen.get_rect(),
                                        manager=mainMenuManager)
-startButton = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 10), (300, 50)),
+startButton = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 150), (300, 50)),
                                             text='Play',
                                             manager=mainMenuManager,
                                             container=mainMenu,
                                             anchors={'centerx': 'centerx'})
+
+settingsButton = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0,10),(300,50)),
+                                          text='Settings',
+                                          manager=mainMenuManager,
+                                          container=mainMenu,
+                                          anchors={'centerx': 'centerx',
+                                                   'top_target': startButton})
 
 quitButton = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0,10),(300,50)),
                                           text='Quit',
                                           manager=mainMenuManager,
                                           container=mainMenu,
                                           anchors={'centerx': 'centerx',
-                                                   'top_target': startButton})
+                                                   'top_target': settingsButton})
+
+#settingsmenu setup
+settingsMenuManager = pygame_gui.UIManager((400,500))
+settingsMenu = pygame_gui.core.UIContainer(relative_rect=screen.get_rect(),
+                                       manager=settingsMenuManager)
 
 #winmenu setup
 winMenuManager = pygame_gui.UIManager(screen.get_size())
@@ -92,6 +114,8 @@ while running:
                 selectedChecker, currentTurn = gameInit(board, board.oneColor, board.twoColor)
                 gameState = GameState.INGAME
                 mainMenu.disable()
+            elif event.ui_element == settingsButton:
+                print("FIXME: SETTINGS OPENED")
             elif event.ui_element == quitButton:
                 pygame.event.post(pygame.event.Event(pygame.QUIT))
             elif event.ui_element == replayButton:
@@ -150,6 +174,7 @@ while running:
     match gameState:
         case GameState.MENU: #menu draw
             screen.blit(background, (0, 0))
+            screen.blit(logo,(15,50))
             mainMenuManager.draw_ui(screen)
         case GameState.INGAME | GameState.GAMEOVER: #visual game process
             turnText = textFont.render("Turn:",1,(255,255,255,0))
@@ -160,7 +185,7 @@ while running:
 
             screen.blits(((boardSurface,(0,0)), (turnText,(150,430)), (winSurface,(25,75))))
             pygame.draw.rect(screen,"lightgray", turnSquareBorder,border_radius=6)
-            pygame.draw.rect(screen,"white" if currentTurn == inGameState.PLAYERTWO else "red",turnSquare)
+            pygame.draw.rect(screen,board.twoColor if currentTurn == inGameState.PLAYERTWO else board.oneColor,turnSquare)
 
             if gameState == GameState.GAMEOVER:
                 winMenuManager.draw_ui(screen)

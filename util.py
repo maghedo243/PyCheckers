@@ -1,9 +1,11 @@
+import json
 import os
 import sys
 from enum import Enum, IntEnum
 
 import pygame
 from pygame import Surface
+from pygame import system
 
 
 class Pair:
@@ -71,6 +73,36 @@ class GameState(IntEnum):
     MENU = 1
     INGAME = 2
     GAMEOVER = 3
+
+class Settings:
+    checkerColorOne = "red"
+    checkerColorTwo = "white"
+    squareColorOne = "white"
+    squareColorTwo = "black"
+    writepath = pygame.system.get_pref_path("PyGames", "PyCheckers")
+
+    if not os.path.isfile(writepath+"/settings.json"):
+        with open(writepath+"/settings.json","w") as f:
+            option_dict = {"colors": {"checkerColorOne":"red",
+                                      "checkerColorTwo":"white",
+                                      "squareColorOne":"white",
+                                      "squareColorTwo":"black"
+            }}
+            json.dump(option_dict,f,indent=4)
+
+    @classmethod
+    def loadSettings(cls):
+        with open(cls.writepath + "/settings.json", "r") as f:
+            option_dict = json.load(f)
+        cls.checkerColorOne = option_dict["colors"]["checkerColorOne"]
+        cls.checkerColorTwo = option_dict["colors"]["checkerColorTwo"]
+        cls.squareColorOne = option_dict["colors"]["squareColorOne"]
+        cls.squareColorTwo = option_dict["colors"]["squareColorTwo"]
+
+
+
+
+
 
 def surfaceBorder(surface: Surface,thickness: int,color):
     widthIndex = (thickness/(thickness-2)) if (thickness-2 > 0) else 0

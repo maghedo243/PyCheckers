@@ -6,7 +6,7 @@ from queue import SimpleQueue
 import pygame
 from pygame import Rect, Surface
 
-from util import Pair, inGameState, CheckerMove, get_path, MoveDirection
+from util import Pair, inGameState, CheckerMove, get_path, MoveDirection, Settings
 
 crownImage = pygame.image.load(get_path("resources/images/crown.png"))
 crownImage = pygame.transform.smoothscale(crownImage,(30,30))
@@ -14,14 +14,14 @@ crownImage.fill("yellow",special_flags=pygame.BLEND_ADD)
 
 class Board:
     def __init__(self):
-        self.boardState = [[BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black")],
-                           [BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white")],
-                           [BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black")],
-                           [BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white")],
-                           [BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black")],
-                           [BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white")],
-                           [BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black")],
-                           [BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white"),BoardSquare("black"),BoardSquare("white")]]
+        self.boardState = [[BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo)],
+                           [BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne)],
+                           [BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo)],
+                           [BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne)],
+                           [BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo)],
+                           [BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne)],
+                           [BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo)],
+                           [BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne)]]
         self.checkerLocations = [[None,None,None,None,None,None,None,None],
                                 [None,None,None,None,None,None,None,None],
                                 [None,None,None,None,None,None,None,None],
