@@ -4,9 +4,19 @@ import sys
 from enum import Enum, IntEnum
 
 import pygame
-from pygame import Surface
+from pygame import Surface, Color
 from pygame import system
 
+import ast
+
+def parse_tuple(string):
+    try:
+        s = ast.literal_eval(str(string))
+        if type(s) == tuple:
+            return s
+        return
+    except:
+        return
 
 class Pair:
     def __init__(self,first,second):
@@ -71,22 +81,23 @@ class inGameState(IntEnum):
 
 class GameState(IntEnum):
     MENU = 1
-    INGAME = 2
-    GAMEOVER = 3
+    SETTINGS = 2
+    INGAME = 3
+    GAMEOVER = 4
 
 class Settings:
     checkerColorOne = "red"
     checkerColorTwo = "white"
-    squareColorOne = "white"
-    squareColorTwo = "black"
+    squareColorOne = "black"
+    squareColorTwo = "white"
     writepath = pygame.system.get_pref_path("PyGames", "PyCheckers")
 
     if not os.path.isfile(writepath+"/settings.json"):
         with open(writepath+"/settings.json","w") as f:
-            option_dict = {"colors": {"checkerColorOne":"red",
-                                      "checkerColorTwo":"white",
-                                      "squareColorOne":"white",
-                                      "squareColorTwo":"black"
+            option_dict = {"colors": {"checkerColorOne":'["255","0","0"]',
+                                      "checkerColorTwo":'["255","255","255"]',
+                                      "squareColorOne":'["0","0","0"]',
+                                      "squareColorTwo":'["255","255","255"]'
             }}
             json.dump(option_dict,f,indent=4)
 
@@ -94,10 +105,24 @@ class Settings:
     def loadSettings(cls):
         with open(cls.writepath + "/settings.json", "r") as f:
             option_dict = json.load(f)
-        cls.checkerColorOne = option_dict["colors"]["checkerColorOne"]
-        cls.checkerColorTwo = option_dict["colors"]["checkerColorTwo"]
-        cls.squareColorOne = option_dict["colors"]["squareColorOne"]
-        cls.squareColorTwo = option_dict["colors"]["squareColorTwo"]
+
+        cls.checkerColorOne = Color([int(n) for n in ast.literal_eval(option_dict["colors"]["checkerColorOne"])])
+        cls.checkerColorTwo = Color([int(n) for n in ast.literal_eval(option_dict["colors"]["checkerColorTwo"])])
+        cls.squareColorOne = Color([int(n) for n in ast.literal_eval(option_dict["colors"]["squareColorOne"])])
+        cls.squareColorTwo = Color([int(n) for n in ast.literal_eval(option_dict["colors"]["squareColorTwo"])])
+
+    @classmethod
+    def saveSettings(cls):
+        with open(cls.writepath + "/settings.json", "w") as f:
+            option_dict = {"colors": {"checkerColorOne": str(cls.checkerColorOne),
+                                      "checkerColorTwo": str(cls.checkerColorTwo),
+                                      "squareColorOne": str(cls.squareColorOne),
+                                      "squareColorTwo": str(cls.squareColorTwo)
+                                      }}
+            json.dump(option_dict, f, indent=4)
+
+
+
 
 
 
@@ -137,3 +162,15 @@ def getImage(path:str, newScale:tuple=None):
     if newScale != None:
         image = pygame.transform.smoothscale(image,newScale)
     return image
+
+def borderedColorSquare(surface,mainColor,x,y,width,height,borderColor=None,borderwidth=0,borderradius=0):
+    if borderColor:
+        borderX = borderwidth*2
+        borderRect = pygame.Rect(x,y,width,height)
+        colorRect = pygame.Rect(x+borderwidth,y+borderwidth,width-borderX,height-borderX)
+        pygame.draw.rect(surface,borderColor,borderRect,border_radius=borderradius)
+        pygame.draw.rect(surface,mainColor,colorRect)
+    else:
+        colorRect = pygame.Rect(x,y,width,height)
+        pygame.draw.rect(surface,mainColor,colorRect)
+    return colorRect

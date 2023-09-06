@@ -14,14 +14,14 @@ crownImage.fill("yellow",special_flags=pygame.BLEND_ADD)
 
 class Board:
     def __init__(self):
-        self.boardState = [[BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo)],
-                           [BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne)],
-                           [BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo)],
-                           [BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne)],
-                           [BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo)],
-                           [BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne)],
-                           [BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo)],
-                           [BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne),BoardSquare(Settings.squareColorTwo),BoardSquare(Settings.squareColorOne)]]
+        self.boardState = [[BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne)],
+                           [BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo)],
+                           [BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne)],
+                           [BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo)],
+                           [BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne)],
+                           [BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo)],
+                           [BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne)],
+                           [BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo)]]
         self.checkerLocations = [[None,None,None,None,None,None,None,None],
                                 [None,None,None,None,None,None,None,None],
                                 [None,None,None,None,None,None,None,None],
@@ -108,6 +108,17 @@ class Board:
         """
         self.oneColor = oneColor
         self.twoColor = twoColor
+
+        self.boardState = [[BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne)],
+                           [BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo)],
+                           [BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne)],
+                           [BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo)],
+                           [BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne)],
+                           [BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo)],
+                           [BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne)],
+                           [BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo)]]
+        
+        
         for x in range(8):
             for y in range(8):
                 if (x%2 == 0 and y%2 == 1 and x < 3) or (x%2 == 1 and y%2 == 0 and x < 3):
@@ -119,6 +130,7 @@ class Board:
             startingChecker = self.checkerLocations[random.randint(2,5)][random.randint(2,5)]
             if startingChecker is not None:
                 break
+                
         return startingChecker
 
     def testBoardLayout(self,oneColor,twoColor):
