@@ -1,6 +1,3 @@
-import os
-import time
-
 from tkinter.colorchooser import askcolor
 import pygame
 import pygame.gfxdraw
@@ -18,13 +15,19 @@ pygame.init()
 screen = pygame.display.set_mode((400, 500))
 pygame.display.set_caption("PyCheckers")
 boardSurface = pygame.Surface((400,400))
+clock = pygame.time.Clock()
+
+#pausemenu surface
+pauseSurface = pygame.Surface((350,350))
+pauseSurface.fill("blue")
+pauseSurface.set_alpha(0)
+util.surfaceBorder(pauseSurface,10,"black")
+
+#winmenu surface
 winSurface = pygame.Surface((350,350))
 winSurface.fill("blue")
 winSurface.set_alpha(0)
 util.surfaceBorder(winSurface,10,"black")
-clock = pygame.time.Clock()
-
-
 
 
 gameState = GameState.MENU
@@ -37,9 +40,9 @@ settingsImg = util.getImage("resources/images/settings.png", (350, 85))
 textFont = pygame.font.SysFont("monospace", 15)
 winFont = pygame.font.SysFont("monospace", 30)
 
-def gameInit(newboard: Board,oneColor,twoColor):
+def gameInit(newboard: Board):
     newboard.clear()
-    newboard.defaultBoardLayout(oneColor,twoColor)
+    newboard.defaultBoardLayout()
     oneImage.fill(newboard.oneColor, special_flags=pygame.BLEND_MAX)
     twoImage.fill(newboard.twoColor, special_flags=pygame.BLEND_MAX)
     return [None,inGameState.PLAYERONE]
@@ -47,12 +50,12 @@ def gameInit(newboard: Board,oneColor,twoColor):
 running = True
 dt = 0
 board = Board()
-selectedChecker, currentTurn = gameInit(board, Settings.checkerColorOne, Settings.checkerColorTwo)
-background = pygame.Surface((400,500))
+selectedChecker, currentTurn = gameInit(board)
+background = pygame.Surface(screen.get_size())
 background.fill("darkolivegreen4")
 
 #mainmenu setup
-mainMenuManager = pygame_gui.UIManager((400,500))
+mainMenuManager = pygame_gui.UIManager(screen.get_size())
 mainMenu = pygame_gui.core.UIContainer(relative_rect=screen.get_rect(),
                                        manager=mainMenuManager)
 startButton = pygame_gui.elements.UIButton(relative_rect=Rect((0, 150), (300, 50)),
@@ -78,8 +81,8 @@ quitButton = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0,10),(300,
 
 #settingsmenu setup
 previewBoard = Board()
-previewBoard.defaultBoardLayout(Settings.checkerColorOne,Settings.checkerColorTwo)
-settingsMenuManager = pygame_gui.UIManager((400,500))
+previewBoard.defaultBoardLayout()
+settingsMenuManager = pygame_gui.UIManager(screen.get_size())
 settingsMenu = pygame_gui.core.UIContainer(relative_rect=screen.get_rect(),
                                        manager=settingsMenuManager)
 colorDropdownText = pygame_gui.elements.UILabel(Rect(40,200,110,25),
@@ -110,7 +113,17 @@ settingsExitButton = pygame_gui.elements.UIButton(relative_rect=Rect(7,380,190,4
                                                      manager=settingsMenuManager,
                                                      container=settingsMenu)
 
+#gamemenu setup
+gameMenuManager = pygame_gui.UIManager(screen.get_size())
+gameMenu = pygame_gui.core.UIContainer(relative_rect=Rect(0,400,400,100),
+                                       manager=gameMenuManager)
+pauseButton = pygame_gui.elements.UIButton(relative_rect=Rect(0, 75, 75, 25),
+                                           text="Pause",
+                                           manager=gameMenuManager,
+                                           container=gameMenu)
 
+#pausemenu setup
+pauseMenuManager = pygame_gui.UIManager(screen.get_size())
 
 #winmenu setup
 winMenuManager = pygame_gui.UIManager(screen.get_size())
@@ -128,6 +141,7 @@ menuButton = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 240), (3
                                             container=winMenu,
                                            anchors={'centerx': 'centerx'})
 
+gameMenu.disable()
 settingsMenu.disable()
 winMenu.disable()
 
@@ -142,14 +156,18 @@ while running:
     events = pygame.event.get()
     for event in events:
         mainMenuManager.process_events(event)
-        winMenuManager.process_events(event)
         settingsMenuManager.process_events(event)
+        gameMenuManager.process_events(event)
+        winMenuManager.process_events(event)
+
 
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == startButton:
-                selectedChecker, currentTurn = gameInit(board, board.oneColor, board.twoColor)
+                Settings.loadSettings()
+                selectedChecker, currentTurn = gameInit(board)
                 gameState = GameState.INGAME
                 mainMenu.disable()
+                gameMenu.enable()
             elif event.ui_element == settingsButton:
                 mainMenu.disable()
                 settingsMenu.enable()
@@ -167,7 +185,7 @@ while running:
             elif event.ui_element == quitButton:
                 pygame.event.post(pygame.event.Event(pygame.QUIT))
             elif event.ui_element == replayButton:
-                selectedChecker, currentTurn = gameInit(board, board.oneColor, board.twoColor)
+                selectedChecker, currentTurn = gameInit(board)
                 winMenu.disable()
                 winSurface.fill("blue")
                 winSurface.set_alpha(0)
@@ -180,13 +198,19 @@ while running:
                 util.surfaceBorder(winSurface, 10, "black")
                 mainMenu.enable()
                 gameState = GameState.MENU
+            elif event.ui_element == pauseButton:
+                gameMenu.disable()
+                mainMenu.enable()
+                gameState = GameState.MENU
             elif event.ui_element == colorChoiceButton:
-                colorChoice = Color(askcolor(title="Choose Color")[0])
-                match colorDropdown.selected_option:
-                    case "Player One Color": Settings.checkerColorOne = colorChoice
-                    case "Player Two Color": Settings.checkerColorTwo = colorChoice
-                    case "Primary Square Color": Settings.squareColorOne = colorChoice
-                    case "Secondary Square Color": Settings.squareColorTwo = colorChoice
+                colorChoice = askcolor(title="Choose Color")[0]
+                if colorChoice:
+                    colorChoice = Color(colorChoice)
+                    match colorDropdown.selected_option:
+                        case "Player One Color": Settings.checkerColorOne = colorChoice
+                        case "Player Two Color": Settings.checkerColorTwo = colorChoice
+                        case "Primary Square Color": Settings.squareColorOne = colorChoice
+                        case "Secondary Square Color": Settings.squareColorTwo = colorChoice
         elif event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
             if event.ui_element == colorDropdown:
                 colorOption = colorDropdown.selected_option
@@ -197,14 +221,12 @@ while running:
                 for y,rows in enumerate(board.boardState):
                     for x,cell in enumerate(rows):
                         if cell.hitbox.collidepoint(event.pos):
-                            print("White exists?",board.playerSearch(2))
                             print("Cell Color:",cell.color)
                             print("Cell Location:",y,x)
                             print("Selected Checker Location:", selectedChecker.pos if selectedChecker is not None else "No Checker Selected")
                             print("Selected Checker Possible Kills:", selectedChecker.possibleKills.__len__() if selectedChecker is not None else "No Checker Selected")
                             if board.checkerLocations[y][x] is not None:
                                 if selectedChecker is not None and board.checkerLocations[y][x].playerID == selectedChecker.playerID:
-                                    print("New Checker Selected")
                                     selectedChecker.selected = False
                                     selectedChecker.moveHighlight(True)
                                     selectedChecker = board.checkerLocations[y][x]
@@ -223,8 +245,10 @@ while running:
                                     selectedChecker = None
 
     mainMenuManager.update(dt)
-    winMenuManager.update(dt)
     settingsMenuManager.update(dt)
+    gameMenuManager.update(dt)
+    winMenuManager.update(dt)
+
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("darkgray")
 
@@ -243,7 +267,7 @@ while running:
                 case "Secondary Square Color": settingsOptionColor = Settings.squareColorTwo
 
             previewSpace = Surface((160, 160))
-            previewBoard.defaultBoardLayout(Settings.checkerColorOne,Settings.checkerColorTwo)
+            previewBoard.defaultBoardLayout()
             previewBoard.drawBoard(previewSpace)
 
             screen.blit(background, (0, 0))
@@ -279,8 +303,10 @@ while running:
                 winSurface.set_alpha(255)
 
             else: #win checking
+                gameMenuManager.draw_ui(screen)
                 wincheck = board.winCheck()
                 if wincheck:
+                    gameMenu.disable()
                     winMenu.enable()
                     gameState = GameState.GAMEOVER
 

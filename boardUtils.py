@@ -98,7 +98,7 @@ class Board:
                                  [None, None, None, None, None, None, None, None],
                                  [None, None, None, None, None, None, None, None]]
 
-    def defaultBoardLayout(self,oneColor,twoColor):
+    def defaultBoardLayout(self):
         """
         Makes the board match the standard Checkers layout.
 
@@ -106,8 +106,8 @@ class Board:
         :param twoColor: Player Two color
         :return: The starting checker
         """
-        self.oneColor = oneColor
-        self.twoColor = twoColor
+        self.oneColor = Settings.checkerColorOne
+        self.twoColor = Settings.checkerColorTwo
 
         self.boardState = [[BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne)],
                            [BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo), BoardSquare(Settings.squareColorOne), BoardSquare(Settings.squareColorTwo)],
@@ -122,9 +122,9 @@ class Board:
         for x in range(8):
             for y in range(8):
                 if (x%2 == 0 and y%2 == 1 and x < 3) or (x%2 == 1 and y%2 == 0 and x < 3):
-                    Checker(twoColor, self, CheckerDirection.DOWN, Pair(x, y), inGameState.PLAYERTWO)
+                    Checker(self.twoColor, self, CheckerDirection.DOWN, Pair(x, y), inGameState.PLAYERTWO)
                 elif (x%2 == 0 and y%2 == 1 and x > 4) or (x%2 == 1 and y%2 == 0 and x > 4):
-                    Checker(oneColor, self, CheckerDirection.UP, Pair(x, y), inGameState.PLAYERONE)
+                    Checker(self.oneColor, self, CheckerDirection.UP, Pair(x, y), inGameState.PLAYERONE)
 
         while True:
             startingChecker = self.checkerLocations[random.randint(2,5)][random.randint(2,5)]
@@ -337,9 +337,6 @@ class Checker:
             self.pos.first = y
             self.pos.second = x
             self.moveHighlight(True)
-
-            print(self.possibleMoves[moveIndex])
-            print(self.possibleKills)
             for i in self.possibleKills:
                 if i.pos == self.pos + -self.lastMove.moveDirection:
                     curr = self.possibleMoves[moveIndex]

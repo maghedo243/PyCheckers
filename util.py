@@ -86,10 +86,10 @@ class GameState(IntEnum):
     GAMEOVER = 4
 
 class Settings:
-    checkerColorOne = "red"
-    checkerColorTwo = "white"
-    squareColorOne = "black"
-    squareColorTwo = "white"
+    checkerColorOne = Color("red")
+    checkerColorTwo = Color("white")
+    squareColorOne = Color("black")
+    squareColorTwo = Color("white")
     writepath = pygame.system.get_pref_path("PyGames", "PyCheckers")
 
     if not os.path.isfile(writepath+"/settings.json"):
@@ -114,10 +114,10 @@ class Settings:
     @classmethod
     def saveSettings(cls):
         with open(cls.writepath + "/settings.json", "w") as f:
-            option_dict = {"colors": {"checkerColorOne": str(cls.checkerColorOne),
-                                      "checkerColorTwo": str(cls.checkerColorTwo),
-                                      "squareColorOne": str(cls.squareColorOne),
-                                      "squareColorTwo": str(cls.squareColorTwo)
+            option_dict = {"colors": {"checkerColorOne": str(list(cls.checkerColorOne)),
+                                      "checkerColorTwo": str(list(cls.checkerColorTwo)),
+                                      "squareColorOne": str(list(cls.squareColorOne)),
+                                      "squareColorTwo": str(list(cls.squareColorTwo))
                                       }}
             json.dump(option_dict, f, indent=4)
 
