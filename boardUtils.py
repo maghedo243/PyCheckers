@@ -8,8 +8,7 @@ from pygame import Rect, Surface
 
 from util import Pair, inGameState, CheckerMove, get_path, MoveDirection, Settings
 
-crownImage = pygame.image.load(get_path("resources/images/crown.png"))
-crownImage = pygame.transform.smoothscale(crownImage,(30,30))
+crownImage = pygame.transform.smoothscale(pygame.image.load(get_path("resources/images/crown.png")),(30,30))
 crownImage.fill("yellow",special_flags=pygame.BLEND_ADD)
 
 class Board:

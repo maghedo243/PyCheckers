@@ -19,7 +19,7 @@ clock = pygame.time.Clock()
 
 #pausemenu surface
 pauseSurface = pygame.Surface((350,350))
-pauseSurface.fill("blue")
+pauseSurface.fill("darkolivegreen4")
 pauseSurface.set_alpha(0)
 util.surfaceBorder(pauseSurface,10,"black")
 
@@ -34,11 +34,11 @@ gameState = GameState.MENU
 oneImage = util.getImage("resources/images/playerone.png",(300,49))
 twoImage = util.getImage("resources/images/playertwo.png",(300,49))
 winImage = util.getImage("resources/images/wins.png",(145,49))
+pauseImage = util.getImage("resources/images/pause.png",(191,49))
 logo = util.getImage("resources/images/pycheckers.png",(370,69))
 settingsImg = util.getImage("resources/images/settings.png", (350, 85))
 
 textFont = pygame.font.SysFont("monospace", 15)
-winFont = pygame.font.SysFont("monospace", 30)
 
 def gameInit(newboard: Board):
     newboard.clear()
@@ -71,11 +71,11 @@ settingsButton = pygame_gui.elements.UIButton(relative_rect=Rect((0,10),(300,50)
                                           anchors={'centerx': 'centerx',
                                                    'top_target': startButton})
 
-quitButton = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0,10),(300,50)),
-                                          text='Quit',
-                                          manager=mainMenuManager,
-                                          container=mainMenu,
-                                          anchors={'centerx': 'centerx',
+quitPyCheckersButton = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 10), (300, 50)),
+                                                    text='Quit',
+                                                    manager=mainMenuManager,
+                                                    container=mainMenu,
+                                                    anchors={'centerx': 'centerx',
                                                    'top_target': settingsButton})
 
 
@@ -124,6 +124,19 @@ pauseButton = pygame_gui.elements.UIButton(relative_rect=Rect(0, 75, 75, 25),
 
 #pausemenu setup
 pauseMenuManager = pygame_gui.UIManager(screen.get_size())
+pauseMenu = pygame_gui.core.UIContainer(relative_rect=pygame.Rect((25,75),pauseSurface.get_size()),
+                                        manager=pauseMenuManager)
+resumeButton = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((75,100),(200,50)),
+                                            text="Resume",
+                                            manager=pauseMenuManager,
+                                            container=pauseMenu)
+quitGameButton = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((75,10),(200,50)),
+                                              text="Quit Game",
+                                              manager=pauseMenuManager,
+                                              container=pauseMenu,
+                                              anchors={'top_target':resumeButton})
+
+
 
 #winmenu setup
 winMenuManager = pygame_gui.UIManager(screen.get_size())
@@ -157,6 +170,7 @@ while running:
     for event in events:
         mainMenuManager.process_events(event)
         settingsMenuManager.process_events(event)
+        pauseMenuManager.process_events(event)
         gameMenuManager.process_events(event)
         winMenuManager.process_events(event)
 
@@ -182,7 +196,7 @@ while running:
                 settingsMenu.disable()
                 mainMenu.enable()
                 gameState = GameState.MENU
-            elif event.ui_element == quitButton:
+            elif event.ui_element == quitPyCheckersButton:
                 pygame.event.post(pygame.event.Event(pygame.QUIT))
             elif event.ui_element == replayButton:
                 selectedChecker, currentTurn = gameInit(board)
@@ -200,6 +214,20 @@ while running:
                 gameState = GameState.MENU
             elif event.ui_element == pauseButton:
                 gameMenu.disable()
+                pauseMenu.enable()
+                gameState = GameState.PAUSE
+            elif event.ui_element == resumeButton:
+                pauseMenu.disable()
+                pauseSurface.fill("darkolivegreen4")
+                pauseSurface.set_alpha(0)
+                util.surfaceBorder(pauseSurface, 10, "black")
+                gameMenu.enable()
+                gameState = GameState.INGAME
+            elif event.ui_element == quitGameButton:
+                pauseMenu.disable()
+                pauseSurface.fill("darkolivegreen4")
+                pauseSurface.set_alpha(0)
+                util.surfaceBorder(pauseSurface, 10, "black")
                 mainMenu.enable()
                 gameState = GameState.MENU
             elif event.ui_element == colorChoiceButton:
@@ -246,6 +274,7 @@ while running:
 
     mainMenuManager.update(dt)
     settingsMenuManager.update(dt)
+    pauseMenuManager.update(dt)
     gameMenuManager.update(dt)
     winMenuManager.update(dt)
 
@@ -278,13 +307,13 @@ while running:
             screen.blit(previewSpace,previewRect)
 
             settingsMenuManager.draw_ui(screen)
-        case GameState.INGAME | GameState.GAMEOVER: #visual game process
+        case GameState.INGAME | GameState.PAUSE | GameState.GAMEOVER: #visual game process
             turnText = textFont.render("Turn:",1,(255,255,255,0))
             turnColor = board.twoColor if currentTurn == inGameState.PLAYERTWO else board.oneColor
 
             board.drawBoard(boardSurface)
 
-            screen.blits(((boardSurface,(0,0)), (turnText,(150,430)), (winSurface,(25,75))))
+            screen.blits(((boardSurface,(0,0)), (turnText,(150,430)), (winSurface,(25,75)),(pauseSurface,(25,75))))
             util.borderedColorSquare(screen,turnColor,200,425,38,38,"lightgray",4,6)
 
             if gameState == GameState.GAMEOVER:
@@ -302,6 +331,11 @@ while running:
                         raise Exception("WINVALUE ERROR")
                 winSurface.set_alpha(255)
 
+            elif gameState == GameState.PAUSE:
+                pauseMenuManager.draw_ui(screen)
+                pauseSurface.blit(pauseImage,(79.5,30))
+
+                pauseSurface.set_alpha(255)
             else: #win checking
                 gameMenuManager.draw_ui(screen)
                 wincheck = board.winCheck()

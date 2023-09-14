@@ -82,8 +82,9 @@ class inGameState(IntEnum):
 class GameState(IntEnum):
     MENU = 1
     SETTINGS = 2
-    INGAME = 3
-    GAMEOVER = 4
+    PAUSE = 3
+    INGAME = 4
+    GAMEOVER = 5
 
 class Settings:
     checkerColorOne = Color("red")
