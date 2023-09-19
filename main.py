@@ -176,61 +176,61 @@ while running:
 
 
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            if event.ui_element == startButton:
+            if event.ui_element == startButton: #start game
                 Settings.loadSettings()
                 selectedChecker, currentTurn = gameInit(board)
                 gameState = GameState.INGAME
                 mainMenu.disable()
                 gameMenu.enable()
-            elif event.ui_element == settingsButton:
+            elif event.ui_element == settingsButton: #enter settings
                 mainMenu.disable()
                 settingsMenu.enable()
                 gameState = GameState.SETTINGS
-            elif event.ui_element == settingsExitButton:
+            elif event.ui_element == settingsExitButton: #leave settings without saving
                 Settings.loadSettings()
                 settingsMenu.disable()
                 mainMenu.enable()
                 gameState = GameState.MENU
-            elif event.ui_element == settingsConfirmButton:
+            elif event.ui_element == settingsConfirmButton: #leave settings with saving
                 Settings.saveSettings()
                 settingsMenu.disable()
                 mainMenu.enable()
                 gameState = GameState.MENU
-            elif event.ui_element == quitPyCheckersButton:
+            elif event.ui_element == quitPyCheckersButton: #quit application
                 pygame.event.post(pygame.event.Event(pygame.QUIT))
-            elif event.ui_element == replayButton:
+            elif event.ui_element == replayButton: #replay from win menu
                 selectedChecker, currentTurn = gameInit(board)
                 winMenu.disable()
                 winSurface.fill("blue")
                 winSurface.set_alpha(0)
                 util.surfaceBorder(winSurface, 10, "black")
                 gameState = GameState.INGAME
-            elif event.ui_element == menuButton:
+            elif event.ui_element == menuButton: #return to menu from win menu
                 winMenu.disable()
                 winSurface.fill("blue")
                 winSurface.set_alpha(0)
                 util.surfaceBorder(winSurface, 10, "black")
                 mainMenu.enable()
                 gameState = GameState.MENU
-            elif event.ui_element == pauseButton:
+            elif event.ui_element == pauseButton: #pause game
                 gameMenu.disable()
                 pauseMenu.enable()
                 gameState = GameState.PAUSE
-            elif event.ui_element == resumeButton:
+            elif event.ui_element == resumeButton: #resume game
                 pauseMenu.disable()
                 pauseSurface.fill("darkolivegreen4")
                 pauseSurface.set_alpha(0)
                 util.surfaceBorder(pauseSurface, 10, "black")
                 gameMenu.enable()
                 gameState = GameState.INGAME
-            elif event.ui_element == quitGameButton:
+            elif event.ui_element == quitGameButton: #return to menu from pause menu
                 pauseMenu.disable()
                 pauseSurface.fill("darkolivegreen4")
                 pauseSurface.set_alpha(0)
                 util.surfaceBorder(pauseSurface, 10, "black")
                 mainMenu.enable()
                 gameState = GameState.MENU
-            elif event.ui_element == colorChoiceButton:
+            elif event.ui_element == colorChoiceButton: #color choice in settings
                 colorChoice = askcolor(title="Choose Color")[0]
                 if colorChoice:
                     colorChoice = Color(colorChoice)
