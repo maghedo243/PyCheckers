@@ -5,7 +5,6 @@ from enum import Enum, IntEnum
 
 import pygame
 from pygame import Surface, Color
-from pygame import system
 
 import ast
 
@@ -60,13 +59,14 @@ class MoveDirection(Enum):
         return -self.value[0],-self.value[1]
 
 class CheckerMove:
-    def __init__(self,square,coords:Pair,direction:MoveDirection,moveType:str,parentMove=None):
+    def __init__(self,square,coords:Pair,direction:MoveDirection,moveType:str,parentMove=None,moveValue=0.0):
         self.moveSquare = square
         self.moveDirection = direction
         self.moveType = moveType
         self.coords = coords
         self.kill = None
         self.parentMove = parentMove
+        self.moveValue = moveValue
 
     def __str__(self):
         return "Move Square - " + str(self.moveSquare) + ", Move Direction: " + str(self.moveDirection) + ", Move Type: " + self.moveType + ", Kill Target: " + str(self.kill)

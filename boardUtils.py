@@ -137,6 +137,8 @@ class Board:
         self.twoColor = twoColor
         Checker(twoColor, self, CheckerDirection.DOWN, Pair(2, 5), inGameState.PLAYERTWO)
         Checker(twoColor, self, CheckerDirection.DOWN, Pair(5, 2), inGameState.PLAYERTWO)
+        Checker(oneColor, self, CheckerDirection.UP, Pair(3,4), inGameState.PLAYERONE)
+        Checker(oneColor, self, CheckerDirection.UP, Pair(5, 4), inGameState.PLAYERONE)
         Checker(twoColor, self, CheckerDirection.DOWN, Pair(3, 2), inGameState.PLAYERTWO)
         Checker(twoColor, self, CheckerDirection.DOWN, Pair(1, 2), inGameState.PLAYERTWO)
         Checker(oneColor, self, CheckerDirection.UP, Pair(6, 1), inGameState.PLAYERONE)
@@ -155,6 +157,12 @@ class BoardSquare:
     def __init__(self,color):
         self.color = color
         self.hitbox = Rect(0,0,0,0)
+
+    def getX(self):
+        return self.hitbox.x
+
+    def getY(self):
+        return self.hitbox.y
 
     def __str__(self):
         return "X: " + str(self.hitbox.x) + ", Y: " + str(self.hitbox.y)
@@ -196,7 +204,7 @@ class Checker:
 
 
     def calculateMoves(self):
-        """Calculates the move possibilities based on the Checker's direction state."""
+        """Calculates the move possibilities based on the Checker's direction state. Uses BFS"""
         localMoves = list()
         toBeVisited = SimpleQueue()
         visited = set()

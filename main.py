@@ -4,10 +4,18 @@ import pygame.gfxdraw
 from pygame import Rect, Color, Surface
 
 import util
+from CPUPlayer import CPUPlayer
 from boardUtils import Board
 from util import inGameState, GameState, Settings
 
 import pygame_gui
+
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-d','--debug',action="store_true")
+argse = parser.parse_args()
+DEBUG = argse.debug
 
 #initial game setup
 Settings.loadSettings()
@@ -29,8 +37,7 @@ winSurface.fill("blue")
 winSurface.set_alpha(0)
 util.surfaceBorder(winSurface,10,"black")
 
-
-gameState = GameState.MENU
+#resource loading
 oneImage = util.getImage("resources/images/playerone.png",(300,49))
 twoImage = util.getImage("resources/images/playertwo.png",(300,49))
 winImage = util.getImage("resources/images/wins.png",(145,49))
@@ -45,12 +52,15 @@ def gameInit(newboard: Board):
     newboard.defaultBoardLayout()
     oneImage.fill(newboard.oneColor, special_flags=pygame.BLEND_MAX)
     twoImage.fill(newboard.twoColor, special_flags=pygame.BLEND_MAX)
-    return [None,inGameState.PLAYERONE]
+    return [None,inGameState.PLAYERONE,CPUPlayer(newboard,newboard.twoColor)]
 
+#game vars
 running = True
+gameState = GameState.MENU
 dt = 0
+gameType = "multi"
 board = Board()
-selectedChecker, currentTurn = gameInit(board)
+selectedChecker, currentTurn, CPU = gameInit(board)
 background = pygame.Surface(screen.get_size())
 background.fill("darkolivegreen4")
 
@@ -178,7 +188,7 @@ while running:
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == startButton: #start game
                 Settings.loadSettings()
-                selectedChecker, currentTurn = gameInit(board)
+                selectedChecker, currentTurn, CPU = gameInit(board)
                 gameState = GameState.INGAME
                 mainMenu.disable()
                 gameMenu.enable()
@@ -246,31 +256,62 @@ while running:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if gameState == GameState.INGAME: #Board Click Check
-                for y,rows in enumerate(board.boardState):
-                    for x,cell in enumerate(rows):
-                        if cell.hitbox.collidepoint(event.pos):
-                            print("Cell Color:",cell.color)
-                            print("Cell Location:",y,x)
-                            print("Selected Checker Location:", selectedChecker.pos if selectedChecker is not None else "No Checker Selected")
-                            print("Selected Checker Possible Kills:", selectedChecker.possibleKills.__len__() if selectedChecker is not None else "No Checker Selected")
-                            if board.checkerLocations[y][x] is not None:
-                                if selectedChecker is not None and board.checkerLocations[y][x].playerID == selectedChecker.playerID:
-                                    selectedChecker.selected = False
-                                    selectedChecker.moveHighlight(True)
-                                    selectedChecker = board.checkerLocations[y][x]
-                                    selectedChecker.selected = True
-                                elif selectedChecker is None and board.checkerLocations[y][x].playerID == currentTurn:
-                                    selectedChecker = board.checkerLocations[y][x]
-                                    selectedChecker.selected = True
-                            elif selectedChecker is not None:
-                                if selectedChecker.move(x, y):
-                                    match currentTurn:
-                                        case inGameState.PLAYERONE:
+                if gameType == "single":
+                    if currentTurn == inGameState.PLAYERONE:
+                        for y, rows in enumerate(board.boardState):
+                            for x, cell in enumerate(rows):
+                                if cell.hitbox.collidepoint(event.pos):
+                                    if DEBUG:
+                                        print("Cell Color:", cell.color)
+                                        print("Cell Location:", y, x)
+                                        print("Move Square:", board.boardState[y][x])
+                                        print("Selected Checker Location:", selectedChecker.pos if selectedChecker is not None else "No Checker Selected")
+                                        print("Selected Checker Possible Kills:", selectedChecker.possibleKills.__len__() if selectedChecker is not None else "No Checker Selected")
+                                    if board.checkerLocations[y][x] is not None:
+                                        if selectedChecker is not None and board.checkerLocations[y][x].playerID == selectedChecker.playerID:
+                                            selectedChecker.selected = False
+                                            selectedChecker.moveHighlight(True)
+                                            selectedChecker = board.checkerLocations[y][x]
+                                            selectedChecker.selected = True
+                                        elif selectedChecker is None and board.checkerLocations[y][x].playerID == currentTurn:
+                                            selectedChecker = board.checkerLocations[y][x]
+                                            selectedChecker.selected = True
+                                    elif selectedChecker is not None:
+                                        if selectedChecker.move(x, y):
                                             currentTurn = inGameState.PLAYERTWO
-                                        case inGameState.PLAYERTWO:
-                                            currentTurn = inGameState.PLAYERONE
-                                    selectedChecker.selected = False
-                                    selectedChecker = None
+                                            selectedChecker.selected = False
+                                            selectedChecker = None
+                    elif currentTurn == inGameState.PLAYERTWO:
+                        CPU.chooseMove()
+                        #TODO CPUPlayer e
+                elif gameType == "multi":
+                    for y,rows in enumerate(board.boardState):
+                        for x,cell in enumerate(rows):
+                            if cell.hitbox.collidepoint(event.pos):
+                                if DEBUG:
+                                    print("Cell Color:",cell.color)
+                                    print("Cell Location:",y,x)
+                                    print("Move Square:",board.boardState[y][x])
+                                    print("Selected Checker Location:", selectedChecker.pos if selectedChecker is not None else "No Checker Selected")
+                                    print("Selected Checker Possible Kills:", selectedChecker.possibleKills.__len__() if selectedChecker is not None else "No Checker Selected")
+                                if board.checkerLocations[y][x] is not None:
+                                    if selectedChecker is not None and board.checkerLocations[y][x].playerID == selectedChecker.playerID:
+                                        selectedChecker.selected = False
+                                        selectedChecker.moveHighlight(True)
+                                        selectedChecker = board.checkerLocations[y][x]
+                                        selectedChecker.selected = True
+                                    elif selectedChecker is None and board.checkerLocations[y][x].playerID == currentTurn:
+                                        selectedChecker = board.checkerLocations[y][x]
+                                        selectedChecker.selected = True
+                                elif selectedChecker is not None:
+                                    if selectedChecker.move(x, y):
+                                        match currentTurn:
+                                            case inGameState.PLAYERONE:
+                                                currentTurn = inGameState.PLAYERTWO
+                                            case inGameState.PLAYERTWO:
+                                                currentTurn = inGameState.PLAYERONE
+                                        selectedChecker.selected = False
+                                        selectedChecker = None
 
     mainMenuManager.update(dt)
     settingsMenuManager.update(dt)
