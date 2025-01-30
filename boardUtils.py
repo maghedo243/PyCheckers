@@ -173,8 +173,6 @@ class CheckerDirection(IntEnum):
     UP = 1
     DOWN = 2
 
-
-
 class Checker:
     """A checker. This stores its:
 

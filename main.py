@@ -94,7 +94,7 @@ previewBoard = Board()
 previewBoard.defaultBoardLayout()
 settingsMenuManager = pygame_gui.UIManager(screen.get_size())
 settingsMenu = pygame_gui.core.UIContainer(relative_rect=screen.get_rect(),
-                                       manager=settingsMenuManager)
+                                           manager=settingsMenuManager)
 colorDropdownText = pygame_gui.elements.UILabel(Rect(40,200,110,25),
                                                 "Color Choice:",
                                                 manager=settingsMenuManager,
@@ -105,7 +105,7 @@ colorDropdown = pygame_gui.elements.UIDropDownMenu(["Player One Color","Player T
                                                    manager=settingsMenuManager,
                                                    container=settingsMenu,
                                                    anchors={'left_target':colorDropdownText})
-colorOption = colorDropdown.selected_option
+colorOption = colorDropdown.selected_option[0]
 colorChoiceButton = pygame_gui.elements.UIButton(relative_rect=Rect(100,250,100,30),
                                                  text="Choose",
                                                  manager=settingsMenuManager,
@@ -187,11 +187,11 @@ while running:
 
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == startButton: #start game
+                mainMenu.disable()
+                gameMenu.enable()
                 Settings.loadSettings()
                 selectedChecker, currentTurn, CPU = gameInit(board)
                 gameState = GameState.INGAME
-                mainMenu.disable()
-                gameMenu.enable()
             elif event.ui_element == settingsButton: #enter settings
                 mainMenu.disable()
                 settingsMenu.enable()
@@ -244,14 +244,14 @@ while running:
                 colorChoice = askcolor(title="Choose Color")[0]
                 if colorChoice:
                     colorChoice = Color(colorChoice)
-                    match colorDropdown.selected_option:
+                    match colorDropdown.selected_option[0]:
                         case "Player One Color": Settings.checkerColorOne = colorChoice
                         case "Player Two Color": Settings.checkerColorTwo = colorChoice
                         case "Primary Square Color": Settings.squareColorOne = colorChoice
                         case "Secondary Square Color": Settings.squareColorTwo = colorChoice
         elif event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
             if event.ui_element == colorDropdown:
-                colorOption = colorDropdown.selected_option
+                colorOption = colorDropdown.selected_option[0]
         elif event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -339,6 +339,7 @@ while running:
             previewSpace = Surface((160, 160))
             previewBoard.defaultBoardLayout()
             previewBoard.drawBoard(previewSpace)
+
 
             screen.blit(background, (0, 0))
             screen.blit(settingsImg, (25, 40))
